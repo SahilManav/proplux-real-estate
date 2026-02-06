@@ -17,7 +17,16 @@ console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? '✅ Loaded' : '❌ Not Load
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://proplux-real-estate.vercel.app"
+    ],
+    credentials: true,
+  })
+);
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
