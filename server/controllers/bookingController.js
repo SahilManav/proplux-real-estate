@@ -1,62 +1,76 @@
-// server/controllers/bookingController.js
 import Booking from '../models/Booking.js';
 import Property from '../models/Property.js';
-import { sendEmail } from '../utils/sendEmail.js';
 
-
-// Book a visit and send confirmation email
+// Book a visit
 export const bookVisit = async (req, res) => {
   try {
     const { visitDate, message } = req.body;
-    const booking = await Booking.create({
-      user: req.user._id,
-      property: req.params.id,
-      visitDate,
-      message,
-      status: 'confirmed',
-    });
+
+    if (!visitDate) {
+      return res.status(400).json({ message: "Visit date is required" });
+    }
 
     const property = await Property.findById(req.params.id);
+    if (!property) {
+      return res.status(404).json({ message: "Property not found" });
+    }
 
-    await sendEmail({
-      to: req.user.email,
-      subject: 'Your PropLux Booking is Confirmed',
-      html: `
-        <h2>Booking Confirmation</h2>
-        <p>You have successfully booked a visit to:</p>
-        <ul>
-          <li><strong>Property:</strong> ${property.title}</li>
-          <li><strong>Location:</strong> ${property.city}, ${property.country}</li>
-          <li><strong>Date:</strong> ${new Date(visitDate).toLocaleDateString()}</li>
-        </ul>
-        <p>Thank you for choosing PropLux!</p>
-      `,
+    const booking = await Booking.create({
+      user: req.user._id,
+      property: property._id,
+      visitDate,
+      message,
+      status: "confirmed",
     });
 
-    res.status(201).json(booking);
+    // 🔥 Email intentionally disabled (causing Render hang)
+    // Will be re-added later via background job / queue
+
+    return res.status(201).json({
+      message: "Booking successful",
+      booking,
+    });
+
   } catch (err) {
-    console.error("Booking Error:", err.message);
-    res.status(500).json({ message: "Booking failed" });
+    console.error("Booking Error:", err);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
-// Get all bookings for a user
+// Get user's bookings
 export const getMyBookings = async (req, res) => {
-  const bookings = await Booking.find({ user: req.user._id, status: 'confirmed' }).populate('property');
+  const bookings = await Booking.find({
+    user: req.user._id,
+    status: "confirmed",
+  }).populate("property");
+
   res.json(bookings);
 };
 
-// Cancel a booking
+// Cancel booking
 export const cancelBooking = async (req, res) => {
-  const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
-  if (!booking) return res.status(400).json({ message: "Booking not found" });
-  booking.status = 'cancelled';
+  const booking = await Booking.findOne({
+    _id: req.params.id,
+    user: req.user._id,
+  });
+
+  if (!booking) {
+    return res.status(404).json({ message: "Booking not found" });
+  }
+
+  booking.status = "cancelled";
   await booking.save();
+
   res.json({ message: "Booking cancelled successfully" });
 };
 
-// Admin: get all bookings
+// Admin: all bookings
 export const getAllBookings = async (req, res) => {
-  const bookings = await Booking.find().populate('user').populate('property');
+  const bookings = await Booking.find()
+    .populate("user")
+    .populate("property");
+
   res.json(bookings);
 };
