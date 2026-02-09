@@ -16,6 +16,7 @@ const Properties = () => {
   const [sortOption, setSortOption] = useState("");
   const navigate = useNavigate();
 
+  /* ---------------- FETCH PROPERTIES ---------------- */
   const fetchProperties = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/properties`);
@@ -29,19 +30,24 @@ const Properties = () => {
     }
   };
 
+  /* ---------------- FETCH FAVORITES (SAFE) ---------------- */
   const fetchFavorites = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return; // ✅ do nothing if not logged in
+
     try {
       const res = await fetch(`${API_BASE_URL}/favorites`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
+
+      if (!res.ok) return; // silently ignore 401
+
       const data = await res.json();
-      if (res.ok) {
-        setFavorites(data.filter((p) => p?._id).map((p) => p._id));
-      }
-    } catch (err) {
-      console.error(err);
+      setFavorites(data.filter((p) => p?._id).map((p) => p._id));
+    } catch {
+      // silently ignore errors
     }
   };
 
@@ -53,6 +59,7 @@ const Properties = () => {
     setRecentlyViewed(stored);
   }, []);
 
+  /* ---------------- VIEW PROPERTY ---------------- */
   const handleView = (property) => {
     const stored = JSON.parse(localStorage.getItem(RECENT_KEY)) || [];
 
@@ -67,7 +74,14 @@ const Properties = () => {
     navigate(`/properties/${property._id}`);
   };
 
+  /* ---------------- TOGGLE FAVORITE ---------------- */
   const toggleFavorite = async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.info("Please login to use favorites");
+      return;
+    }
+
     if (processingId === id) return;
     setProcessingId(id);
 
@@ -76,7 +90,7 @@ const Properties = () => {
       const res = await fetch(`${API_BASE_URL}/favorites/${id}`, {
         method: isFav ? "DELETE" : "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -115,11 +129,7 @@ const Properties = () => {
     <div className="max-w-7xl mx-auto px-4 py-14">
       {/* Heading */}
       <div className="text-center mb-12">
-        <h1
-          className="text-4xl md:text-5xl font-extrabold tracking-wide
-          bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500
-          bg-clip-text text-transparent"
-        >
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-wide bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent">
           Explore Luxury Properties
         </h1>
         <div className="mx-auto mt-4 h-[2px] w-24 bg-gradient-to-r from-yellow-500 to-yellow-300 rounded-full" />
@@ -130,9 +140,7 @@ const Properties = () => {
         <select
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
-          className="bg-black/50 backdrop-blur-md text-yellow-300
-          border border-yellow-500/40 rounded-full px-6 py-2
-          shadow-lg hover:shadow-yellow-500/30 transition"
+          className="bg-black/50 backdrop-blur-md text-yellow-300 border border-yellow-500/40 rounded-full px-6 py-2 shadow-lg"
         >
           <option value="">All Cities</option>
           {cities.map((city) => (
@@ -145,9 +153,7 @@ const Properties = () => {
         <select
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
-          className="bg-black/50 backdrop-blur-md text-yellow-300
-          border border-yellow-500/40 rounded-full px-6 py-2
-          shadow-lg hover:shadow-yellow-500/30 transition"
+          className="bg-black/50 backdrop-blur-md text-yellow-300 border border-yellow-500/40 rounded-full px-6 py-2 shadow-lg"
         >
           <option value="">Sort by Price</option>
           <option value="low">Low → High</option>
@@ -155,7 +161,7 @@ const Properties = () => {
         </select>
       </div>
 
-      {/* All Properties */}
+      {/* Properties */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
         {filtered.map((property) => (
           <PropertyCard
@@ -169,7 +175,7 @@ const Properties = () => {
         ))}
       </div>
 
-      {/* Recently Viewed (BOTTOM) */}
+      {/* Recently Viewed */}
       {recentlyViewed.length > 0 && (
         <div className="border-t border-yellow-500/20 pt-14">
           <h2 className="text-3xl font-bold text-yellow-400 mb-8">
