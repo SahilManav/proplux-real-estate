@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const BookVisit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ const BookVisit = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/bookings/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/bookings/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +46,7 @@ const BookVisit = () => {
         navigate("/properties");
       });
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Booking failed");
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,7 @@ const BookVisit = () => {
 
   const fetchProperty = async () => {
     try {
-      const res = await fetch(`/api/properties/${id}`);
+      const res = await fetch(`${API_BASE_URL}/properties/${id}`);
       const data = await res.json();
       if (!res.ok) throw new Error("Failed to fetch property");
       setProperty(data);
@@ -76,7 +78,9 @@ const BookVisit = () => {
         className="space-y-6 bg-white p-6 rounded-2xl shadow-2xl text-black"
       >
         <label className="block">
-          <span className="text-lg font-semibold mb-2 block">Select a date:</span>
+          <span className="text-lg font-semibold mb-2 block">
+            Select a date:
+          </span>
           <input
             type="date"
             className="form-field"
@@ -101,7 +105,7 @@ const BookVisit = () => {
             title="property-map"
             src={`https://maps.google.com/maps?q=${encodeURIComponent(
               property.city || "India"
-            )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+            )}&z=13&output=embed`}
             width="100%"
             height="300"
             loading="lazy"
