@@ -24,23 +24,33 @@ const Login = () => {
     setShowPassword((prev) => !prev);
   };
 
+  /* ---------------- SAFE JSON PARSER ---------------- */
+  const parseResponse = async (res) => {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
+  };
+
   /* ---------------- NORMAL LOGIN ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `${API}/api/auth/login`,   // ✅ FIXED
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const res = await fetch(`${API}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
+      const data = await parseResponse(res);
+
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
 
       const userObj = {
         _id: data.user._id,
@@ -70,22 +80,20 @@ const Login = () => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
 
-      const googleData = {
-        name: decoded.name,
-        email: decoded.email,
-      };
+      const res = await fetch(`${API}/api/auth/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: decoded.name,
+          email: decoded.email,
+        }),
+      });
 
-      const res = await fetch(
-        `${API}/api/auth/google-login`,   // ✅ FIXED
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(googleData),
-        }
-      );
+      const data = await parseResponse(res);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Google Login failed");
+      if (!res.ok) {
+        throw new Error(data.message || "Google Login failed");
+      }
 
       const userObj = {
         _id: data.user._id,
