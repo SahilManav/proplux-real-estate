@@ -10,6 +10,8 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const API = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +31,7 @@ const Login = () => {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
+        `${API}/api/auth/login`,   // ✅ FIXED
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -45,7 +47,7 @@ const Login = () => {
         name: data.user.name,
         email: data.user.email,
         isAdmin: data.user.isAdmin,
-        image: null, // ✅ explicit null (important)
+        image: null,
       };
 
       localStorage.setItem("user", JSON.stringify(userObj));
@@ -74,7 +76,7 @@ const Login = () => {
       };
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/google-login`,
+        `${API}/api/auth/google-login`,   // ✅ FIXED
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -90,7 +92,7 @@ const Login = () => {
         name: data.user.name,
         email: data.user.email,
         isAdmin: data.user.isAdmin,
-        image: decoded.picture || null, // ✅ Google profile photo
+        image: decoded.picture || null,
       };
 
       localStorage.setItem("user", JSON.stringify(userObj));
