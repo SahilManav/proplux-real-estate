@@ -19,7 +19,7 @@ const Properties = () => {
   /* ---------------- FETCH PROPERTIES ---------------- */
   const fetchProperties = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/properties`);
+      const res = await fetch(`${API_BASE_URL}/api/properties`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to load properties");
       setProperties(data);
@@ -30,24 +30,24 @@ const Properties = () => {
     }
   };
 
-  /* ---------------- FETCH FAVORITES (SAFE) ---------------- */
+  /* ---------------- FETCH FAVORITES ---------------- */
   const fetchFavorites = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return; // ✅ do nothing if not logged in
+    if (!token) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/favorites`, {
+      const res = await fetch(`${API_BASE_URL}/api/favorites`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!res.ok) return; // silently ignore 401
+      if (!res.ok) return;
 
       const data = await res.json();
       setFavorites(data.filter((p) => p?._id).map((p) => p._id));
     } catch {
-      // silently ignore errors
+      // ignore silently
     }
   };
 
@@ -87,7 +87,7 @@ const Properties = () => {
 
     try {
       const isFav = favorites.includes(id);
-      const res = await fetch(`${API_BASE_URL}/favorites/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/favorites/${id}`, {
         method: isFav ? "DELETE" : "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -122,7 +122,11 @@ const Properties = () => {
     });
 
   if (loading) {
-    return <p className="text-center text-white mt-20">Loading properties...</p>;
+    return (
+      <p className="text-center text-white mt-20">
+        Loading properties...
+      </p>
+    );
   }
 
   return (

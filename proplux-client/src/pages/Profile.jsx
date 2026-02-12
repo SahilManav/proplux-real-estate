@@ -7,13 +7,15 @@ const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const API = import.meta.env.VITE_API_URL; // ✅ Production API URL
+
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showBookings, setShowBookings] = useState(false);
 
   const fetchBookings = async () => {
     try {
-      const res = await fetch("/api/bookings/my", {
+      const res = await fetch(`${API}/api/bookings/my`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -31,7 +33,7 @@ const Profile = () => {
 
   const cancelBooking = async (bookingId) => {
     try {
-      const res = await fetch(`/api/bookings/${bookingId}`, {
+      const res = await fetch(`${API}/api/bookings/${bookingId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -60,7 +62,7 @@ const Profile = () => {
   return (
     <div className="max-w-6xl mx-auto py-12 px-4 text-white">
 
-      {/* 🔥 PROFILE HERO CARD */}
+      {/* PROFILE HERO CARD */}
       <div className="bg-gradient-to-br from-[#111] to-[#1c1c1c] border border-gold rounded-2xl p-8 shadow-2xl flex flex-col md:flex-row items-center gap-8">
         {user?.image ? (
           <img
@@ -104,7 +106,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* 📊 STATS CARDS */}
+      {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10">
         <div className="bg-[#111] border border-gold rounded-xl p-6 text-center hover:scale-[1.02] transition">
           <p className="text-gray-400">Total Bookings</p>
@@ -121,7 +123,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* 🧾 BOOKINGS LIST */}
+      {/* BOOKINGS */}
       {showBookings && (
         <div className="mt-12 bg-white text-black rounded-2xl p-6 shadow-xl">
           <h2 className="text-2xl font-bold mb-6">
@@ -162,7 +164,7 @@ const Profile = () => {
         </div>
       )}
 
-      {/* 👑 ADMIN PANEL */}
+      {/* ADMIN PANEL */}
       {user?.isAdmin && (
         <div className="mt-14 bg-[#111] border border-gold rounded-2xl p-8 shadow-xl">
           <h2 className="text-2xl font-bold text-gold mb-4">

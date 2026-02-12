@@ -7,9 +7,11 @@ const AdminProperties = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const API = import.meta.env.VITE_API_URL; // ✅ Production API
+
   const fetchProperties = async () => {
     try {
-      const res = await fetch("/api/properties", {
+      const res = await fetch(`${API}/api/properties`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -31,7 +33,7 @@ const AdminProperties = () => {
     if (!window.confirm("Delete this property?")) return;
 
     try {
-      const res = await fetch(`/api/properties/${id}`, {
+      const res = await fetch(`${API}/api/properties/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -54,7 +56,9 @@ const AdminProperties = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-8 text-white">Manage All Properties</h1>
+      <h1 className="text-3xl font-bold mb-8 text-white">
+        Manage All Properties
+      </h1>
 
       <div className="grid gap-6">
         {loading ? (
@@ -69,7 +73,9 @@ const AdminProperties = () => {
             >
               <div>
                 <h2 className="text-xl font-bold">{p.title}</h2>
-                <p className="text-sm">{p.city}, {p.country}</p>
+                <p className="text-sm">
+                  {p.city}, {p.country}
+                </p>
               </div>
 
               <div className="flex gap-3">

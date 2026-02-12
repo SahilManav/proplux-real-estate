@@ -1,17 +1,17 @@
-import express from 'express';
-import {
-  bookVisit,
-  getMyBookings,
-  getAllBookings,
-  cancelBooking, // ✅ NEW
-} from '../controllers/bookingController.js';
-import { protect } from '../middleware/authMiddleware.js';
+  import express from 'express';
+  import {
+    bookVisit,
+    getMyBookings,
+    getAllBookings,
+    cancelBooking,
+  } from '../controllers/bookingController.js';
+  import { protect } from '../middleware/authMiddleware.js';
 
-const router = express.Router();
+  const router = express.Router();
 
-router.post('/:id', protect, bookVisit);         // POST /api/bookings/:id → Book a visit
-router.get('/my', protect, getMyBookings);       // GET /api/bookings/my → User's bookings
-router.get('/', protect, getAllBookings);        // GET /api/bookings → Admin only
-router.delete('/:id', protect, cancelBooking);   // ✅ DELETE /api/bookings/:id → Cancel booking
+  router.post('/:id', protect, bookVisit);
+  router.get('/my', protect, getMyBookings);
+  router.get('/', protect, getAllBookings);
+  router.delete('/:id', protect, cancelBooking);
 
-export default router;
+  export default router;

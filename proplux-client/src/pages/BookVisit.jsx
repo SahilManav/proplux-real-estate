@@ -14,6 +14,12 @@ const BookVisit = () => {
 
   const handleBooking = async (e) => {
     e.preventDefault();
+
+    if (!date) {
+      toast.error("Please select a date");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -26,27 +32,33 @@ const BookVisit = () => {
         body: JSON.stringify({ visitDate: date }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Booking failed");
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Server error. Please try again.");
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Booking failed");
+      }
 
       Swal.fire({
         icon: "success",
         title: "Booking Confirmed 🎉",
         html: `
-          <p><strong>${property.title}</strong></p>
-          <p>${property.city}, ${property.country}</p>
+          <p><strong>${property?.title}</strong></p>
+          <p>${property?.city}, ${property?.country}</p>
           <p>Date: ${new Date(date).toLocaleDateString()}</p>
         `,
         confirmButtonText: "OK",
         confirmButtonColor: "#000",
-        customClass: {
-          popup: "rounded-xl",
-        },
       }).then(() => {
         navigate("/properties");
       });
+
     } catch (err) {
-      toast.error(err.message || "Booking failed");
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -78,9 +90,7 @@ const BookVisit = () => {
         className="space-y-6 bg-white p-6 rounded-2xl shadow-2xl text-black"
       >
         <label className="block">
-          <span className="text-lg font-semibold mb-2 block">
-            Select a date:
-          </span>
+          <span className="text-lg font-semibold mb-2 block">Select a date:</span>
           <input
             type="date"
             className="form-field"
@@ -93,7 +103,7 @@ const BookVisit = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold text-black font-bold py-3 rounded-lg hover:opacity-90 transition duration-300"
+          className="w-full bg-gold text-black font-bold py-3 rounded-lg"
         >
           {loading ? "Booking..." : "Confirm Booking"}
         </button>

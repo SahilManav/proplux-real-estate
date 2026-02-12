@@ -1,5 +1,6 @@
 import Booking from '../models/Booking.js';
 import Property from '../models/Property.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 // Book a visit
 export const bookVisit = async (req, res) => {
@@ -23,8 +24,23 @@ export const bookVisit = async (req, res) => {
       status: "confirmed",
     });
 
-    // 🔥 Email intentionally disabled (causing Render hang)
-    // Will be re-added later via background job / queue
+    // ✅ Send confirmation email (non-blocking)
+    sendEmail({
+      to: req.user.email,
+      subject: "Booking Confirmed - PropLux",
+      html: `
+        <h2>Booking Confirmed 🎉</h2>
+        <p>Your visit has been scheduled successfully.</p>
+        <hr/>
+        <p><strong>Property:</strong> ${property.title}</p>
+        <p><strong>Location:</strong> ${property.location}</p>
+        <p><strong>Visit Date:</strong> ${visitDate}</p>
+        <br/>
+        <p>Thank you for choosing <strong>PropLux</strong>.</p>
+      `,
+    }).catch((err) => {
+      console.error("Email Error:", err);
+    });
 
     return res.status(201).json({
       message: "Booking successful",
