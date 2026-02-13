@@ -1,6 +1,9 @@
 # 🏠 PropLux - Real Estate Web App
 
-![PropLux Banner](./assets/banner.png)
+<p align="center">
+  <img src="./assets/banner.png" width="70%" />
+</p>
+
 
 PropLux is a luxurious real estate web application built with the **MERN Stack** (MongoDB, Express.js, React.js, Node.js). It allows users to explore, book, and manage premium properties, while admins can manage listings and bookings via a dedicated admin panel.
 
