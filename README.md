@@ -1,7 +1,7 @@
 # 🏠 PropLux - Real Estate Web App
 
 <p align="center">
-  <img src="./assets/banner.png" width="70%" />
+  <img src="./assets/banner.png" width="60%" />
 </p>
 
 
